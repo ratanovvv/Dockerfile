@@ -1,0 +1,77 @@
+version: '2'
+
+networks:
+  test:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.30.0.0/24
+          gateway: 172.30.0.1
+
+services:
+  dnsmasq:
+    image: your-repo.local/s3dnsmasq:0.0.1-SNAPSHOT
+    hostname: dnsmasq
+    container_name: dnsmasq
+    extends:
+      file: common-service.yml
+      service: log-restart
+    networks:
+      test:
+        ipv4_address: 172.30.0.21
+    environment:
+      - S3_HOST=s3.objectstore.com
+      - S3_IP=172.30.0.22
+    ports:
+      - 53
+    volumes:
+      - dns_conf_dir:/etc/dnsmasq.d
+
+  s3.objectstore.com:
+    image: your-repo.local/riak:0.0.10-SNAPSHOT
+    hostname: s3.objectstore.com
+    container_name: s3.objectstore.com
+    dns:
+      - 172.30.0.21
+    networks:
+      test:
+        ipv4_address: 172.30.0.22
+    environment:
+      - IP_ADDR=172.30.0.22
+      - IP_STANCHION=172.30.0.22
+      - ADMINKEY=new_admin_key
+      - ADMINSECRET=new_admin_secret
+    ports:
+      - 8080
+    volumes:
+      - riak_conf_dir:/etc/riak
+      - riakcs_conf_dir:/etc/riak-cs
+      - stanchion_conf_dir:/etc/stanchion
+      - riak_data_dir:/var/lib/riak
+      - riakcs_data_dir:/var/lib/riak-cs
+      - stanchion_data_dir:/var/lib/stanchion
+
+  s3.objectstore1.com:
+    image: your-repo.local/riak:0.0.8-SNAPSHOT
+    hostname: s3.objectstore1.com
+    container_name: s3.objectstore1.com
+    dns:
+      - 172.30.0.21
+    networks:
+      test:
+        ipv4_address: 172.30.0.23
+    environment:
+      - IP_ADDR=172.30.0.23
+      - IP_STANCHION=172.30.0.22
+      - ADMINKEY=new_admin_key
+      - ADMINSECRET=new_admin_secret
+
+volumes:
+  riak_conf_dir:
+  riakcs_conf_dir:
+  stanchion_conf_dir:
+  riak_data_dir:
+  riakcs_data_dir:
+  stanchion_data_dir:
+  dns_conf_dir:
