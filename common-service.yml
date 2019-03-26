@@ -1,0 +1,30 @@
+version: '2'
+
+services:
+  log-restart:
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "2"
+    restart: unless-stopped
+
+  log-dns-restart:
+    extends: log-restart
+    dns:
+      - 172.30.0.21
+
+  net-log-dns-restart:
+    extends: log-dns-restart
+    networks:
+      - test
+
+  app-template-80:
+    extends: net-log-dns-restart
+    ports:
+      - 80
+
+  app-template-8000:
+    extends: net-log-dns-restart
+    ports:
+      - 8000
