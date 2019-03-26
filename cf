@@ -1,0 +1,12 @@
+FROM debian:9-slim
+RUN apt-get update && \
+    apt-get install -y gnupg apt-transport-https && \
+    apt-get install -y curl && \
+    ( curl -fsSL https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key | apt-key add - ) && \
+    echo "deb https://packages.cloudfoundry.org/debian stable main" > /etc/apt/sources.list.d/cloudfoundry-cli.list && \
+    apt-get update && \
+    apt-get install -y cf-cli && \
+    apt-get purge -y gnupg apt-transport-https curl && \
+    apt-get autoremove -y --purge gnupg apt-transport-https curl && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*

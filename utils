@@ -1,0 +1,3 @@
+FROM alpine
+RUN apk add --update curl git tar zip unzip && \
+  rm -rf /var/cache/apk/*
